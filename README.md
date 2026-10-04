@@ -48,11 +48,12 @@ src/
 
 ### Eigene Sprachaufnahmen statt TTS
 
-Lege MP3s unter `public/audio/` ab, benannt nach `<key>-<variante>.mp3` (Variante ab 0 gezählt, z. B.
-`pauseStart-0.mp3` für die erste Variante von `pauseStart`), und trage die Namen ohne Endung in
-`public/audio/manifest.json` ein, z. B. `["pauseStart-0", "pauseStart-1", "lehrer_open-0"]`.
-Vorhandene Aufnahmen ersetzen automatisch die Sprachausgabe; Texte mit Spielernamen (`{name}`) laufen weiter per TTS.
-MP3s werden mit gecacht und funktionieren offline.
+Jede Stimme ist ein Ordner unter `public/audio/` (z. B. `female/`, `male/`) mit Dateien `<key>-<variante>.mp3`
+(Variante ab 0 gezählt, z. B. `pauseStart-0.mp3`). Das Manifest wird bei `npm run dev`/`npm run build`
+automatisch erzeugt, jeder Ordner erscheint in den Optionen als eigene Erzählstimme.
+Ansagen mit Spielernamen werden zusammengesetzt: **[Name] + Textstück** – der Name kommt aus der eigenen
+Aufnahme des Spielers (Spieler-Editor › „Namen einsprechen“) oder von der Computerstimme.
+Alle Dateien mit Texten: [AUFNAHMEN.md](AUFNAHMEN.md). MP3s werden mit gecacht und funktionieren offline.
 
 ## Deployment auf GitHub Pages (HTTPS)
 

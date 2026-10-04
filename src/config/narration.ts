@@ -1,11 +1,14 @@
 /**
  * Alle Erzähltexte an einem Ort.
  * Pro Situation mehrere Varianten – eine wird zufällig gewählt.
- * Platzhalter: {name}, {partner}, {names}, {role}, {minutes}, {by}
  *
- * Aufgenommene MP3s: Lege `public/audio/<key>-<variante>.mp3` ab
- * (Variante ab 0 gezählt) und trage sie in `public/audio/manifest.json` ein.
- * Texte mit Platzhaltern werden weiterhin per Sprachausgabe gesprochen.
+ * Keine Platzhalter im Text! Ansagen mit Spielernamen werden zusammengesetzt:
+ *   [Name des Spielers] + after…-Text   (z. B. "Anna" + "wurde erwischt. Busted!")
+ *   roleIntro-Text + [role_…]           (z. B. "Die Rolle war:" + "Klassensprecher.")
+ * Der Name kommt aus der eigenen Aufnahme des Spielers oder von der Computerstimme.
+ *
+ * Aufgenommene MP3s: `public/audio/<stimme>/<key>-<variante>.mp3` (Variante ab 0).
+ * Das Manifest wird automatisch erzeugt. Liste aller Aufnahmen: AUFNAHMEN.md
  */
 export const NARRATION = {
   // --- Spielstart & Rollen ---------------------------------------------------
@@ -94,27 +97,42 @@ export const NARRATION = {
     'Wunder geschehen: In dieser Pause wurde niemand erwischt.',
     'Alle noch da? Tatsächlich! Niemand wurde erwischt.',
   ],
-  busted: [
-    '{name} wurde erwischt. Busted!',
-    'Oh oh. {name} ist aufgeflogen. Busted!',
-    'Erwischt! {name}, pack deine Sachen. Busted!',
+  // [Name] + …
+  afterBusted: [
+    'wurde erwischt. Busted!',
+    'ist aufgeflogen. Busted!',
+    '– erwischt! Pack deine Sachen. Busted!',
   ],
-  bustedPair: [
-    '{name} war mit {by} in einer Gruppenarbeit und fliegt gleich mit raus. Busted!',
-    'Mitgehangen, mitgefangen: {name} fliegt zusammen mit {by} raus.',
+  // [Name] + … (Partner einer Gruppenarbeit)
+  afterPair: [
+    'war in der Gruppenarbeit und fliegt gleich mit raus. Busted!',
+    '– mitgehangen, mitgefangen! Die Gruppenarbeit fliegt zusammen raus. Busted!',
   ],
-  bustedPetze: ['{by} hat gepetzt! {name} fliegt auch raus. Busted!', '{by} verpetzt {name}. Busted!'],
-  roleReveal: ['{name} war {role}.', 'Und {name} war übrigens {role}.'],
+  // [Name] + … (von der Petze mitgenommen)
+  afterPetze: ['wurde verpetzt und fliegt auch raus. Busted!', '– verpetzt! Ab ins Sekretariat. Busted!'],
 
-  petzeCall: [
-    '{name} war die Petze! Bevor du gehst, darfst du noch jemanden verpetzen. Nimm das Handy.',
-    'Moment! {name} ist die Petze und nimmt vielleicht noch jemanden mit.',
+  // … + [Rolle]
+  roleIntro: ['Die Rolle war:', 'Ein Blick ins Zeugnis verrät:'],
+  role_lehrer: ['Lehrer.'],
+  role_schueler: ['Schüler.'],
+  role_klassensprecher: ['Klassensprecher.'],
+  role_schulleiter: ['Schulleiter.'],
+  role_vertrauenslehrer: ['Vertrauenslehrer.'],
+  role_petze: ['Petze.'],
+  role_vertretungslehrer: ['Vertretungslehrer.'],
+  role_streber: ['Streber.'],
+  role_spicker: ['Spicker.'],
+
+  // [Name] + …
+  afterPetzeCall: [
+    'war die Petze! Bevor du gehst, darfst du noch jemanden verpetzen. Nimm das Handy.',
+    'ist die Petze und nimmt vielleicht noch jemanden mit. Nimm das Handy.',
   ],
   petzeNone: ['Die Petze schweigt diesmal.', 'Keiner wurde verpetzt.'],
 
-  discussionStart: [
-    'Ihr habt {minutes} Zeit zum Diskutieren. Wer benimmt sich verdächtig?',
-    'Die Diskussion ist eröffnet. {minutes} Zeit. Wer war das?',
+  discussionOpen: [
+    'Die Diskussion ist eröffnet. Die Uhr läuft. Wer benimmt sich verdächtig?',
+    'Jetzt wird diskutiert. Wer war das? Ihr habt Zeit, bis der Gong ertönt.',
   ],
   discussionWarn: ['Noch dreißig Sekunden!', 'Noch eine halbe Minute. Kommt zum Punkt!'],
   discussionEnd: ['Stifte weg! Die Zeit ist um.', 'Die Zeit ist um.'],
@@ -131,13 +149,14 @@ export const NARRATION = {
     'Hände hoch! Zählt die Stimmen für jeden Kandidaten und tippt sie ein.',
     'Offene Abstimmung: Zeigt auf euren Verdächtigen und tragt die Stimmen ein.',
   ],
-  voteTie: [
-    'Gleichstand zwischen {names}. Es gibt eine Stichwahl.',
-    'Unentschieden! Stichwahl zwischen {names}.',
+  voteRunoff: [
+    'Gleichstand! Es gibt eine Stichwahl zwischen den Spielern mit den meisten Stimmen.',
+    'Unentschieden! Stichwahl! Nur wer vorne lag, steht jetzt noch zur Wahl.',
   ],
-  voteOut: [
-    'Die Klassenkonferenz hat entschieden: {name} fliegt raus. Busted!',
-    '{name}, ab ins Sekretariat! Busted!',
+  // [Name] + …
+  afterVoteOut: [
+    'fliegt raus. Die Klassenkonferenz hat entschieden. Busted!',
+    '– ab ins Sekretariat! Busted!',
   ],
   voteNobodyTie: [
     'Wieder Gleichstand. Die Konferenz ist sich uneinig, niemand fliegt raus.',

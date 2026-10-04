@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { line, type Line } from '../../audio/lines';
+import { line, named, roleReveal, type Line } from '../../audio/lines';
 import { sfx } from '../../audio/sfx';
 import { BustedCard } from '../../components/BustedStamp';
 import { ROLES } from '../../config/roles';
@@ -22,15 +22,19 @@ function subtitle(game: GameState, e: Elimination): string | undefined {
   }
 }
 
+const AFTER = {
+  gruppenarbeit: 'afterPair',
+  petze: 'afterPetze',
+  konferenz: 'afterVoteOut',
+  lehrer: 'afterBusted',
+  schulleiter: 'afterBusted',
+} as const;
+
+/** [Name] + Textstück (+ Rollenaufdeckung) */
 function bustedLines(game: GameState, e: Elimination): Line[] {
   const p = getPlayer(game, e.playerId)!;
-  const by = getPlayer(game, e.byId)?.name ?? '';
-  const lines: Line[] = [];
-  if (e.cause === 'gruppenarbeit') lines.push(line('bustedPair', { name: p.name, by }));
-  else if (e.cause === 'petze') lines.push(line('bustedPetze', { name: p.name, by }));
-  else if (e.cause === 'konferenz') lines.push(line('voteOut', { name: p.name }));
-  else lines.push(line('busted', { name: p.name }));
-  if (game.options.revealRoles) lines.push(line('roleReveal', { name: p.name, role: ROLES[p.role].withArticle }));
+  const lines = named(p, AFTER[e.cause]);
+  if (game.options.revealRoles) lines.push(...roleReveal(p.role));
   return lines;
 }
 

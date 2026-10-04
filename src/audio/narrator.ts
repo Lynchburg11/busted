@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { NARRATION } from '../config/narration';
-import { splitSentences, type Line } from './lines';
+import { splitSentences, type Line, type TextLine } from './lines';
 import {
   ClipBackend,
   SilentBackend,
@@ -15,6 +15,7 @@ import { sfx } from './sfx';
 interface Unit {
   text: string;
   clipUrl?: string;
+  caption?: string;
 }
 
 interface NarratorUi {
@@ -97,25 +98,30 @@ class Narrator {
    * aufgenommene Variante derselben Ansage genommen – so mischen sich Aufnahme und
    * Computerstimme nicht.
    */
-  private clipFor(l: Line): { id: string; text: string } | null {
+  private clipFor(l: TextLine): { id: string; text: string } | null {
     const pack = this.pack;
-    if (!pack || l.hasVars) return null;
+    if (!pack) return null;
     const id = `${l.key}-${l.variant}`;
     if (pack.has(id)) return { id, text: l.text };
     const options: readonly string[] = NARRATION[l.key];
-    const available = options
-      .map((text, v) => ({ id: `${l.key}-${v}`, text }))
-      .filter((o) => pack.has(o.id) && !/\{\w+\}/.test(o.text));
+    const available = options.map((text, v) => ({ id: `${l.key}-${v}`, text })).filter((o) => pack.has(o.id));
     if (!available.length) return null;
     return available[Math.floor(Math.random() * available.length)];
   }
 
+  /** Liefert die eigene Namensaufnahme eines Spielers (Data-URL), falls vorhanden. */
+  nameAudio: (playerId: string) => string | undefined = () => undefined;
+
   private toUnits(lines: Line[]): Unit[] {
-    return lines.flatMap((l) => {
+    const parts = lines.map((l): Unit[] => {
+      if (l.kind === 'name') return [{ text: l.text, clipUrl: this.nameAudio(l.playerId) }];
       const clip = this.clipFor(l);
       if (clip) return [{ text: clip.text, clipUrl: `${this.clipBase}${this.voicePack}/${clip.id}.mp3` }];
       return splitSentences(l.text).map((text) => ({ text }));
     });
+    // Untertitel zeigt die ganze Ansage, z. B. "Anna wurde erwischt. Busted!"
+    const caption = parts.map((p) => p.map((u) => u.text).join(' ')).join(' ');
+    return parts.flat().map((u) => ({ ...u, caption }));
   }
   private backendFor(u: Unit): AudioBackend {
     if (!this.speechEnabled) return this.silent;
@@ -127,7 +133,7 @@ class Narrator {
   private async playUnit(u: Unit): Promise<PlayResult> {
     const b = this.backendFor(u);
     this.activeBackend = b;
-    useNarratorUi.setState({ caption: u.text, speaking: true });
+    useNarratorUi.setState({ caption: u.caption ?? u.text, speaking: true });
     const r = await b.play(u.text, u.clipUrl);
     if (r !== 'failed') return r;
     // Aufnahme nicht ladbar → Computerstimme

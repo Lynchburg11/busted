@@ -3,6 +3,7 @@ import { usePlayers, type Player } from '../store/players';
 import { Avatar } from './Avatar';
 import { CameraCapture } from './CameraCapture';
 import { ConfirmDialog } from './Dialog';
+import { NameRecorder } from './NameRecorder';
 
 interface Props {
   player?: Player;
@@ -13,6 +14,7 @@ export function PlayerEditor({ player, onDone }: Props) {
   const { add, update, remove, players } = usePlayers();
   const [name, setName] = useState(player?.name ?? '');
   const [photo, setPhoto] = useState<string | undefined>(player?.photo);
+  const [nameAudio, setNameAudio] = useState<string | undefined>(player?.nameAudio);
   const [camera, setCamera] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -21,8 +23,8 @@ export function PlayerEditor({ player, onDone }: Props) {
 
   const submit = () => {
     if (!trimmed || duplicate) return;
-    if (player) update(player.id, { name: trimmed, photo });
-    else add(trimmed, photo);
+    if (player) update(player.id, { name: trimmed, photo, nameAudio });
+    else add(trimmed, photo, nameAudio);
     onDone();
   };
 
@@ -66,6 +68,7 @@ export function PlayerEditor({ player, onDone }: Props) {
         onKeyDown={(e) => e.key === 'Enter' && submit()}
       />
       {duplicate && <p className="text-chalk-red">Den Namen gibt es schon.</p>}
+      <NameRecorder value={nameAudio} onChange={setNameAudio} />
       <button className="btn btn-primary" disabled={!trimmed || duplicate} onClick={submit}>
         Speichern
       </button>

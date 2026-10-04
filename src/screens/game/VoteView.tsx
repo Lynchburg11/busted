@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { joinNames, line } from '../../audio/lines';
 import { PlayerGrid } from '../../components/PlayerGrid';
-import { alivePlayers, getPlayer, nextVoter } from '../../game/rules';
+import { alivePlayers, nextVoter } from '../../game/rules';
 import type { GamePlayer, GameState } from '../../game/types';
 import { useScript } from '../../lib/script';
 import { useGame } from '../../store/game';
@@ -12,10 +12,7 @@ export function VoteView({ game }: { game: GameState }) {
 
   useScript(async (ctx) => {
     if (!phase) return;
-    const intro =
-      phase.round === 1
-        ? line('voteStart')
-        : line('voteTie', { names: joinNames(phase.candidates.map((id) => getPlayer(game, id)?.name ?? '')) });
+    const intro = line(phase.round === 1 ? 'voteStart' : 'voteRunoff');
     await ctx.say([intro, line(game.options.voteMode === 'geheim' ? 'voteSecret' : 'voteOpen')]);
   }, []);
 

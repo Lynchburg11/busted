@@ -118,6 +118,29 @@ export function unlockSpeech() {
   s.speak(u);
 }
 
+const trimCache = new WeakMap<AudioBuffer, [number, number]>();
+
+/**
+ * Stille am Anfang und Ende überspringen – sonst entstehen Lücken zwischen
+ * [Name] und dem folgenden Textstück (v. a. bei selbst eingesprochenen Namen).
+ */
+function trimSilence(buffer: AudioBuffer, threshold = 0.02, margin = 0.06): [number, number] {
+  const cached = trimCache.get(buffer);
+  if (cached) return cached;
+  const data = buffer.getChannelData(0);
+  let first = 0;
+  let last = data.length - 1;
+  while (first < data.length && Math.abs(data[first]) < threshold) first++;
+  while (last > first && Math.abs(data[last]) < threshold) last--;
+  const rate = buffer.sampleRate;
+  const result: [number, number] =
+    first >= last
+      ? [0, buffer.duration]
+      : [Math.max(0, first / rate - margin), Math.min(buffer.duration, last / rate + margin)];
+  trimCache.set(buffer, result);
+  return result;
+}
+
 /**
  * Spielt aufgenommene MP3s über Web Audio ab (auf iOS zuverlässiger als <audio>,
  * weil der AudioContext schon beim ersten Tippen freigeschaltet wird).
@@ -172,7 +195,8 @@ export class ClipBackend implements AudioBackend {
           src.connect(ctx.destination);
           src.onended = () => finish('ended');
           this.source = src;
-          src.start();
+          const [from, to] = trimSilence(buffer);
+          src.start(0, from, to - from);
         },
         () => finish('failed'),
       );

@@ -8,14 +8,6 @@ import { runScript, useScript } from '../../lib/script';
 import { useGame } from '../../store/game';
 import { useSettings } from '../../store/settings';
 
-function spokenDuration(sec: number): string {
-  const m = Math.floor(sec / 60);
-  const s = sec % 60;
-  const min = m === 1 ? 'eine Minute' : `${m} Minuten`;
-  if (m === 0) return `${s} Sekunden`;
-  return s ? `${min} und ${s} Sekunden` : min;
-}
-
 const fmt = (sec: number) => `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
 
 export function DiscussionView({ game }: { game: GameState }) {
@@ -28,7 +20,7 @@ export function DiscussionView({ game }: { game: GameState }) {
   const ended = useRef(false);
 
   useScript(async (ctx) => {
-    await ctx.say(line('discussionStart', { minutes: spokenDuration(total) }));
+    await ctx.say(line('discussionOpen'));
     setRunning(true);
   }, []);
 

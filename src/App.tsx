@@ -26,6 +26,7 @@ export default function App() {
     useSettings.getState().load();
     useGame.getState().load();
     loadVoices();
+    narrator.nameAudio = (id) => usePlayers.getState().players.find((p) => p.id === id)?.nameAudio;
     narrator.loadClipManifest(import.meta.env.BASE_URL);
     requestPersistence();
   }, []);

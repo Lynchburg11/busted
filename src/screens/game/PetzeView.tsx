@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { line } from '../../audio/lines';
+import { line, named } from '../../audio/lines';
 import { PlayerGrid } from '../../components/PlayerGrid';
 import { ROLES } from '../../config/roles';
 import { alivePlayers, getPlayer } from '../../game/rules';
@@ -17,7 +17,7 @@ export function PetzeView({ game }: { game: GameState }) {
   const [busy, setBusy] = useState(false);
 
   useScript(async (ctx) => {
-    if (petze) await ctx.say(line('petzeCall', { name: petze.name }));
+    if (petze) await ctx.say(named(petze, 'afterPetzeCall'));
   }, []);
 
   if (!phase || !petze) return null;
