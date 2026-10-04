@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "audio": "node scripts/audio-manifest.mjs",
+    "audio:check": "node scripts/check-audio.ts",
     "predev": "node scripts/audio-manifest.mjs",
     "dev": "vite --host",
     "prebuild": "node scripts/audio-manifest.mjs",

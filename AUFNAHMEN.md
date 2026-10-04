@@ -4,6 +4,15 @@ Jede Datei kommt in den Ordner der Stimme: `public/audio/female/` bzw. `public/a
 Dateiname = `<key>-<variante>.mp3`. Das Manifest wird beim Start/Build automatisch erzeugt.
 Alle Texte stehen auch in `src/config/narration.ts`.
 
+**Stand:** Beide Stimmen sind vollständig (95/95). Prüfen, ob etwas fehlt oder übrig ist:
+
+```bash
+npm run audio:check
+```
+
+Alte, nicht mehr benutzte Aufnahmen liegen in `audio-archiv/` (wird nicht veröffentlicht).
+Die Listen unten zeigen, was für die Umstellung neu aufgenommen wurde.
+
 ## Wie Ansagen mit Namen funktionieren
 
 In keinem Text steht ein Platzhalter. Ansagen mit Spielernamen setzt die App zusammen:
@@ -126,7 +135,7 @@ Vertrauenslehrer → **Vertrauensschüler**.
 
 ---
 
-## Nicht mehr verwendet (können gelöscht werden)
+## Nicht mehr verwendet (liegen jetzt in `audio-archiv/`)
 
 - Alte Rollennamen: `vertretungslehrer_*`, `vertrauenslehrer_*`, `schulleiter_*`
 - Alte Texte mit Platzhaltern: `busted-*`, `bustedPair-*`, `bustedPetze-*`, `roleReveal-*`, `petzeCall-*`,
