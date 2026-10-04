@@ -6,6 +6,8 @@ import { KEYS, load, save } from './storage';
 
 export interface Settings {
   speechEnabled: boolean;
+  /** Ordner unter public/audio (z. B. "female", "male") oder "tts" = Computerstimme. */
+  voicePack: string;
   voiceURI: string | null;
   rate: number;
   pitch: number;
@@ -20,6 +22,7 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = {
   speechEnabled: true,
+  voicePack: 'female',
   voiceURI: null,
   rate: 1,
   pitch: 1,
@@ -40,6 +43,7 @@ interface SettingsState extends Settings {
 
 function apply(s: Settings) {
   narrator.speechEnabled = s.speechEnabled;
+  narrator.setVoicePack(s.voicePack === 'tts' ? null : s.voicePack);
   narrator.tts.voiceURI = s.voiceURI;
   narrator.tts.rate = s.rate;
   narrator.tts.pitch = s.pitch;

@@ -1,15 +1,23 @@
 import { useEffect, useState } from 'react';
 import { line } from '../audio/lines';
-import { narrator } from '../audio/narrator';
+import { narrator, useNarratorUi } from '../audio/narrator';
 import { sfx } from '../audio/sfx';
 import { germanVoices, loadVoices, ttsSupported } from '../audio/tts';
 import { Page, Stepper, Toggle } from '../components/Layout';
 import { useApp } from '../store/app';
 import { useSettings } from '../store/settings';
 
+const PACK_LABELS: Record<string, string> = {
+  female: '👩 Weiblich (Aufnahme)',
+  male: '👨 Männlich (Aufnahme)',
+  tts: '🤖 Computerstimme',
+};
+
 export function SettingsScreen() {
   const go = useApp((s) => s.go);
   const s = useSettings();
+  const packs = useNarratorUi((u) => u.packs);
+  const activePack = packs.includes(s.voicePack) ? s.voicePack : 'tts';
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
 
   useEffect(() => {
@@ -33,8 +41,29 @@ export function SettingsScreen() {
           checked={s.speechEnabled}
           onChange={(speechEnabled) => s.set({ speechEnabled })}
         />
+        <div className="py-2">
+          <span className="mb-2 block text-xl">Erzählstimme</span>
+          <div className="grid grid-cols-1 gap-2">
+            {[...packs, 'tts'].map((p) => (
+              <button
+                key={p}
+                aria-pressed={activePack === p}
+                className={`btn min-h-12 justify-start text-lg ${activePack === p ? 'btn-primary' : 'btn-chalk'}`}
+                onClick={() => s.set({ voicePack: p })}
+              >
+                {activePack === p ? '✓ ' : ''}
+                {PACK_LABELS[p] ?? `${p} (Aufnahme)`}
+              </button>
+            ))}
+          </div>
+          {activePack !== 'tts' && (
+            <span className="mt-2 block text-base leading-snug text-chalk-dim">
+              Ansagen mit Spielernamen spricht weiterhin die Computerstimme unten.
+            </span>
+          )}
+        </div>
         <label className="block py-2">
-          <span className="mb-1 block text-xl">Stimme</span>
+          <span className="mb-1 block text-xl">{activePack === 'tts' ? 'Stimme' : 'Computerstimme (für Namen)'}</span>
           <select
             className="field text-lg"
             value={s.voiceURI ?? ''}

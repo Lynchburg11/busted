@@ -4,7 +4,10 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "audio": "node scripts/audio-manifest.mjs",
+    "predev": "node scripts/audio-manifest.mjs",
     "dev": "vite --host",
+    "prebuild": "node scripts/audio-manifest.mjs",
     "build": "tsc --noEmit -p tsconfig.json && vite build",
     "preview": "vite preview --host",
     "test": "vitest run",

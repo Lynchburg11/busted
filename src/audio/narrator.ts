@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { NARRATION } from '../config/narration';
 import { splitSentences, type Line } from './lines';
 import {
   ClipBackend,
@@ -20,10 +21,12 @@ interface NarratorUi {
   caption: string;
   speaking: boolean;
   paused: boolean;
+  /** Verfügbare Aufnahme-Stimmen (Ordnernamen). */
+  packs: string[];
 }
 
 /** Zustand für die Anzeige (Untertitel, Pause-Knopf). */
-export const useNarratorUi = create<NarratorUi>(() => ({ caption: '', speaking: false, paused: false }));
+export const useNarratorUi = create<NarratorUi>(() => ({ caption: '', speaking: false, paused: false, packs: [] }));
 
 export class AbortedError extends Error {
   constructor() {
@@ -43,8 +46,12 @@ class Narrator {
   readonly tts = new TtsBackend();
   private clips = new ClipBackend();
   private silent = new SilentBackend();
-  private clipManifest = new Set<string>();
+  /** Aufgenommene Stimmen: Ordnername → vorhandene Clips ("pauseStart-0", …). */
+  private packs: Record<string, Set<string>> = {};
+  private clipBase = '';
   speechEnabled = true;
+  /** Gewählte Aufnahme-Stimme (Ordner unter public/audio) oder null = Computerstimme. */
+  private voicePack: string | null = null;
 
   private paused = false;
   private resumeWaiters: (() => void)[] = [];
@@ -63,31 +70,57 @@ class Narrator {
   }
 
   async loadClipManifest(base: string) {
+    this.clipBase = `${base}audio/`;
     try {
       const res = await fetch(`${base}audio/manifest.json`, { cache: 'no-cache' });
       if (!res.ok) return;
-      const list: string[] = await res.json();
-      this.clipManifest = new Set(list);
-      this.clipBase = `${base}audio/`;
+      const data: Record<string, string[]> = await res.json();
+      if (Array.isArray(data)) return;
+      this.packs = Object.fromEntries(Object.entries(data).map(([k, v]) => [k, new Set(v)]));
+      useNarratorUi.setState({ packs: Object.keys(this.packs) });
     } catch {
       /* keine Aufnahmen vorhanden */
     }
   }
-  private clipBase = '';
+
+  setVoicePack(pack: string | null) {
+    this.voicePack = pack;
+    this.tts.preferredGender = pack === 'female' || pack === 'male' ? pack : null;
+  }
+
+  private get pack(): Set<string> | null {
+    return this.voicePack ? (this.packs[this.voicePack] ?? null) : null;
+  }
+
+  /**
+   * Passende Aufnahme zur Ansage. Fehlt genau diese Variante, wird eine andere
+   * aufgenommene Variante derselben Ansage genommen – so mischen sich Aufnahme und
+   * Computerstimme nicht.
+   */
+  private clipFor(l: Line): { id: string; text: string } | null {
+    const pack = this.pack;
+    if (!pack || l.hasVars) return null;
+    const id = `${l.key}-${l.variant}`;
+    if (pack.has(id)) return { id, text: l.text };
+    const options: readonly string[] = NARRATION[l.key];
+    const available = options
+      .map((text, v) => ({ id: `${l.key}-${v}`, text }))
+      .filter((o) => pack.has(o.id) && !/\{\w+\}/.test(o.text));
+    if (!available.length) return null;
+    return available[Math.floor(Math.random() * available.length)];
+  }
 
   private toUnits(lines: Line[]): Unit[] {
     return lines.flatMap((l) => {
-      const id = `${l.key}-${l.variant}`;
-      if (!l.hasVars && this.clipManifest.has(id)) {
-        return [{ text: l.text, clipUrl: `${this.clipBase}${id}.mp3` }];
-      }
+      const clip = this.clipFor(l);
+      if (clip) return [{ text: clip.text, clipUrl: `${this.clipBase}${this.voicePack}/${clip.id}.mp3` }];
       return splitSentences(l.text).map((text) => ({ text }));
     });
   }
-
   private backendFor(u: Unit): AudioBackend {
+    if (!this.speechEnabled) return this.silent;
     if (u.clipUrl) return this.clips;
-    if (this.speechEnabled && ttsSupported()) return this.tts;
+    if (ttsSupported()) return this.tts;
     return this.silent;
   }
 
@@ -95,7 +128,13 @@ class Narrator {
     const b = this.backendFor(u);
     this.activeBackend = b;
     useNarratorUi.setState({ caption: u.text, speaking: true });
-    return b.play(u.text, u.clipUrl);
+    const r = await b.play(u.text, u.clipUrl);
+    if (r !== 'failed') return r;
+    // Aufnahme nicht ladbar → Computerstimme
+    const fallback = this.backendFor({ text: u.text });
+    this.activeBackend = fallback;
+    const r2 = await fallback.play(u.text);
+    return r2 === 'failed' ? 'ended' : r2;
   }
 
   private waitForResume(): Promise<void> {

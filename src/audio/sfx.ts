@@ -17,8 +17,22 @@ class Sfx {
     return this.ctx;
   }
 
+  /** Gemeinsamer AudioContext (auch für aufgenommene Ansagen). */
+  getContext(): AudioContext | null {
+    return this.audio;
+  }
+
   /** In einer Nutzergeste aufrufen (iOS). */
   unlock() {
+    // iOS 16.4+: auch bei aktivem Stumm-Schalter abspielen
+    const session = (navigator as unknown as { audioSession?: { type: string } }).audioSession;
+    if (session) {
+      try {
+        session.type = 'playback';
+      } catch {
+        /* egal */
+      }
+    }
     const ctx = this.audio;
     if (!ctx) return;
     ctx.resume().catch(() => {});

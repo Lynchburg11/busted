@@ -1,4 +1,6 @@
-export type PlayResult = 'ended' | 'cancelled';
+import { sfx } from './sfx';
+
+export type PlayResult = 'ended' | 'cancelled' | 'failed';
 
 export interface AudioBackend {
   play(text: string, clipUrl?: string): Promise<PlayResult>;
@@ -46,8 +48,26 @@ export function estimateMs(text: string, rate = 1): number {
   return Math.max(800, (words * 420) / Math.max(rate, 0.3));
 }
 
+// Bekannte deutsche Systemstimmen (iOS, macOS, Android, Windows) nach Stimmlage
+const FEMALE = /anna|petra|helena|katja|hedda|marlene|vicki|sandy|shelley|amala|seraphina|louisa|elke|female|frau/i;
+const MALE = /markus|yannick|stefan|conrad|hans|martin|reed|eddy|rocko|ralf|killian|jonas|male|mann/i;
+
 export class TtsBackend implements AudioBackend {
   voiceURI: string | null = null;
+  /** Passend zur Aufnahme-Stimme, falls keine Stimme fest gewählt ist. */
+  preferredGender: 'female' | 'male' | null = null;
+
+  private pickVoice(): SpeechSynthesisVoice | undefined {
+    const chosen = voiceCache.find((v) => v.voiceURI === this.voiceURI);
+    if (chosen) return chosen;
+    const de = germanVoices();
+    if (this.preferredGender) {
+      const re = this.preferredGender === 'female' ? FEMALE : MALE;
+      const match = de.find((v) => re.test(v.name) && !(this.preferredGender === 'female' ? MALE : FEMALE).test(v.name));
+      if (match) return match;
+    }
+    return de[0];
+  }
   rate = 1;
   pitch = 1;
   private finish: ((r: PlayResult) => void) | null = null;
@@ -58,7 +78,7 @@ export class TtsBackend implements AudioBackend {
     return new Promise((resolve) => {
       const u = new SpeechSynthesisUtterance(text);
       u.lang = 'de-DE';
-      const voice = voiceCache.find((v) => v.voiceURI === this.voiceURI) ?? germanVoices()[0];
+      const voice = this.pickVoice();
       if (voice) u.voice = voice;
       u.rate = this.rate;
       u.pitch = this.pitch;
@@ -98,16 +118,43 @@ export function unlockSpeech() {
   s.speak(u);
 }
 
-/** Spielt aufgenommene MP3s ab (ersetzt TTS, wenn eine Aufnahme existiert). */
+/**
+ * Spielt aufgenommene MP3s über Web Audio ab (auf iOS zuverlässiger als <audio>,
+ * weil der AudioContext schon beim ersten Tippen freigeschaltet wird).
+ * Ergebnis 'failed' → der Erzähler fällt auf die Sprachausgabe zurück.
+ */
 export class ClipBackend implements AudioBackend {
-  private audio: HTMLAudioElement | null = null;
+  private buffers = new Map<string, Promise<AudioBuffer>>();
+  private source: AudioBufferSourceNode | null = null;
   private finish: ((r: PlayResult) => void) | null = null;
 
+  /** Dekodierte Clips sind groß – nur die letzten paar im Speicher halten. */
+  private static readonly CACHE_SIZE = 8;
+
+  private load(ctx: AudioContext, url: string): Promise<AudioBuffer> {
+    let p = this.buffers.get(url);
+    if (p) {
+      this.buffers.delete(url); // als zuletzt benutzt markieren
+    } else {
+      p = fetch(url)
+        .then((res) => {
+          if (!res.ok) throw new Error(`${res.status} ${url}`);
+          return res.arrayBuffer();
+        })
+        .then((data) => ctx.decodeAudioData(data));
+      p.catch(() => this.buffers.delete(url));
+    }
+    this.buffers.set(url, p);
+    while (this.buffers.size > ClipBackend.CACHE_SIZE) {
+      this.buffers.delete(this.buffers.keys().next().value!);
+    }
+    return p;
+  }
+
   play(_text: string, clipUrl?: string): Promise<PlayResult> {
-    if (!clipUrl) return Promise.resolve('ended');
+    const ctx = sfx.getContext();
+    if (!clipUrl || !ctx) return Promise.resolve('failed');
     return new Promise((resolve) => {
-      const audio = new Audio(clipUrl);
-      this.audio = audio;
       let settled = false;
       const finish = (r: PlayResult) => {
         if (settled) return;
@@ -116,16 +163,31 @@ export class ClipBackend implements AudioBackend {
         resolve(r);
       };
       this.finish = finish;
-      audio.onended = () => finish('ended');
-      audio.onerror = () => finish('ended');
-      audio.play().catch(() => finish('ended'));
+      ctx.resume().catch(() => {});
+      this.load(ctx, clipUrl).then(
+        (buffer) => {
+          if (settled) return;
+          const src = ctx.createBufferSource();
+          src.buffer = buffer;
+          src.connect(ctx.destination);
+          src.onended = () => finish('ended');
+          this.source = src;
+          src.start();
+        },
+        () => finish('failed'),
+      );
     });
   }
 
   cancel() {
     const f = this.finish;
     this.finish = null;
-    this.audio?.pause();
+    try {
+      this.source?.stop();
+    } catch {
+      /* schon gestoppt */
+    }
+    this.source = null;
     f?.('cancelled');
   }
 }
