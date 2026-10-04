@@ -98,7 +98,7 @@ export function GameScreen() {
   }
 
   return (
-    <div className={`fixed inset-0 ${night ? 'bg-black/55' : ''} transition-colors duration-1000`}>
+    <div className={`fixed inset-0 ${night ? 'bg-black/75' : ''} transition-colors duration-1000`}>
       <div className="safe mx-auto flex h-full max-w-lg flex-col">
         <header className="flex items-center gap-2 pb-2">
           <span className="chalk-title flex-1 truncate text-2xl">{phaseLabel(game)}</span>
@@ -115,7 +115,7 @@ export function GameScreen() {
 
         <main className="flex min-h-0 flex-1 flex-col overflow-y-auto">{view}</main>
 
-        <div className="mt-2 min-h-[3.5rem] rounded-xl bg-black/25 px-3 py-2 text-center text-lg leading-snug text-chalk-dim">
+        <div className="mt-2 line-clamp-3 min-h-[3rem] rounded-xl bg-black/35 px-3 py-1.5 text-center text-base leading-snug text-chalk-dim">
           {caption ? (
             <span className={speaking ? 'chalk' : ''}>
               {speaking && '🔊 '}

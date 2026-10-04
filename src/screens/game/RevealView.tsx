@@ -5,7 +5,7 @@ import { CAMP_NAMES, ROLES } from '../../config/roles';
 import type { GameState } from '../../game/types';
 import { useScript } from '../../lib/script';
 import { useGame } from '../../store/game';
-import { PassPhone, RoleCard } from './common';
+import { CardBack, PassPhone, RoleCard } from './common';
 
 export function RevealView({ game }: { game: GameState }) {
   if (game.phase.type !== 'reveal') return null;
@@ -36,23 +36,23 @@ function RevealOne({ game, index }: { game: GameState; index: number }) {
   }
 
   return (
-    <div className="fade-in flex flex-1 flex-col gap-4">
-      <p className="chalk text-center text-2xl">{player.name}, deine Rolle:</p>
+    <div className="fade-in flex flex-1 flex-col gap-3">
+      <p className="chalk text-center text-xl">{player.name}, deine Rolle:</p>
       <HoldToReveal
         onFirstReveal={() => setSeen(true)}
         hidden={
-          <div className="paper flex min-h-72 flex-col items-center justify-center text-center">
-            <div className="text-6xl">👆</div>
-            <div className="font-marker text-3xl">Gedrückt halten</div>
-            <div className="text-lg">Loslassen verdeckt wieder</div>
-          </div>
+          <CardBack maxDvh={44}>
+            <div className="text-5xl">👆</div>
+            <div className="chalk-title text-2xl leading-tight">Gedrückt halten</div>
+            <div className="text-base leading-snug text-chalk-dim">Handy nah an dich halten – Loslassen verdeckt wieder</div>
+          </CardBack>
         }
-        revealed={<RoleCard role={player.role} />}
+        revealed={<RoleCard role={player.role} maxDvh={44} />}
       />
       {seen && (
         <HoldToReveal
           hidden={
-            <div className="card-chalk p-4 text-center text-xl">📖 Regeln zu deiner Rolle – gedrückt halten</div>
+            <div className="card-chalk px-3 py-2 text-center text-base">📖 Regeln zu deiner Rolle – gedrückt halten</div>
           }
           revealed={
             <div className="paper-plain p-4 text-lg leading-snug">

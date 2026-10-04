@@ -46,6 +46,15 @@ src/
 - **Ansagen**: `src/config/narration.ts` – pro Situation beliebig viele Varianten, Platzhalter wie `{name}`
 - **Wartezeiten der Schein-Aufrufe**: `DUMMY_MS` in `src/screens/game/NightView.tsx`
 
+### Grafiken (Karten, Logo, Hintergrund) und Schrift
+
+Die Originale liegen in `assets-src/` (`cards/<rolle>.jpg`, `logo/busted-logo.jpg`, `backgrounds/klassenraum.jpg`).
+`npm run images` stellt sie frei (weißer Rand/Schatten weg), schneidet zu, verkleinert und schreibt WebP-Dateien
+nach `public/`. Neue oder geänderte Grafiken also in `assets-src/` ablegen und den Befehl ausführen.
+Das App-Icon kommt aus `public/icon.svg` (`npm run icons`).
+
+Schrift: Comic Neue (SIL Open Font License) in `src/assets/fonts/`, eingebunden in `src/index.css`.
+
 ### Eigene Sprachaufnahmen statt TTS
 
 Jede Stimme ist ein Ordner unter `public/audio/` (z. B. `female/`, `male/`) mit Dateien `<key>-<variante>.mp3`

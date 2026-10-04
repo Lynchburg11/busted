@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
 import { narrator } from './audio/narrator';
 import { loadVoices } from './audio/tts';
+import { Backdrop } from './components/Backdrop';
 import { ConfirmDialog } from './components/Dialog';
+import { LOGO_URL } from './lib/assets';
 import { GameScreen } from './screens/game/GameScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { PlayersScreen } from './screens/PlayersScreen';
@@ -85,11 +87,16 @@ export default function App() {
   }, []);
 
   if (!playersLoaded || !settingsLoaded || !gameLoaded) {
-    return <div className="flex h-full items-center justify-center chalk-title text-3xl">Busted!</div>;
+    return (
+      <div className="flex h-full items-center justify-center p-8">
+        <img src={LOGO_URL} alt="Busted!" className="w-full max-w-sm" />
+      </div>
+    );
   }
 
   return (
     <>
+      <Backdrop full={screen === 'home'} />
       {screen === 'home' && <HomeScreen />}
       {screen === 'players' && <PlayersScreen />}
       {screen === 'setup' && <SetupScreen />}

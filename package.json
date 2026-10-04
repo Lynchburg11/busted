@@ -13,12 +13,11 @@
     "preview": "vite preview --host",
     "test": "vitest run",
     "test:watch": "vitest",
-    "icons": "pwa-assets-generator"
+    "icons": "pwa-assets-generator",
+    "images": "node scripts/prepare-images.mjs"
   },
   "dependencies": {
     "@fontsource/black-ops-one": "^5.3.0",
-    "@fontsource/patrick-hand": "^5.3.0",
-    "@fontsource/permanent-marker": "^5.3.0",
     "idb-keyval": "^6.3.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
@@ -31,6 +30,7 @@
     "@types/react-dom": "^19.3.0",
     "@vite-pwa/assets-generator": "^2.0.0",
     "@vitejs/plugin-react": "^6.1.1",
+    "sharp": "^0.35.5",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
     "vite": "^8.3.2",

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ConfirmDialog } from '../components/Dialog';
+import { LOGO_URL } from '../lib/assets';
 import { useApp } from '../store/app';
 import { useGame } from '../store/game';
 
@@ -17,17 +18,21 @@ export function HomeScreen() {
 
   return (
     <div className="safe mx-auto flex h-full max-w-lg flex-col items-center justify-between">
-      <div className="mt-[8vh] flex flex-col items-center">
-        <div className="chalk text-xl tracking-widest text-chalk-dim uppercase">Klassenarbeit</div>
-        <h1 className="mt-2">
-          <span className="stamp stamp-in px-4" style={{ background: 'rgb(253 251 242 / 0.92)' }}>
-            Busted!
-          </span>
+      {/* Logo + Untertitel stehen auf der gemalten Tafel des Hintergrunds (ca. 16–53 % der Höhe) */}
+      <div
+        className="pointer-events-none absolute left-1/2 flex -translate-x-1/2 flex-col items-center justify-center gap-[1.5dvh]"
+        style={{ top: '17.5dvh', height: '34dvh', width: 'min(38dvh, 84vw)' }}
+      >
+        <h1 className="w-full">
+          <img src={LOGO_URL} alt="Busted!" className="stamp-in-soft w-full drop-shadow-lg" draggable={false} />
         </h1>
-        <p className="chalk mt-8 max-w-xs text-center text-xl leading-snug">
-          Schreibt die Arbeit. Spickt heimlich. Und lasst euch bloß nicht von den Lehrern erwischen.
+        <p className="chalk text-center leading-snug" style={{ fontSize: 'min(2.3dvh, 4.6vw)' }}>
+          Schreibt die Arbeit. Spickt heimlich.
+          <br />
+          Und lasst euch bloß nicht erwischen!
         </p>
       </div>
+      <div className="flex-1" />
 
       <nav className="flex w-full flex-col gap-3 pb-4">
         {running && (

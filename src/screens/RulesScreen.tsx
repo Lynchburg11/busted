@@ -1,9 +1,15 @@
+import { useState } from 'react';
+import { Modal } from '../components/Dialog';
 import { Page } from '../components/Layout';
 import { CAMP_NAMES, ROLES, SPECIAL_ROLES } from '../config/roles';
+import type { RoleId } from '../game/types';
+import { cardUrl } from '../lib/assets';
 import { useApp } from '../store/app';
+import { RoleCard } from './game/common';
 
 export function RulesScreen() {
   const go = useApp((s) => s.go);
+  const [zoom, setZoom] = useState<RoleId | null>(null);
   return (
     <Page title="Spielregeln" onBack={() => go('home')}>
       <article className="paper mb-5 text-lg">
@@ -37,18 +43,30 @@ export function RulesScreen() {
         {(['lehrer', 'schueler', ...SPECIAL_ROLES] as const).map((id) => {
           const r = ROLES[id];
           return (
-            <section key={id} className="card-chalk p-4">
-              <h3 className="flex items-center gap-2 text-2xl">
-                <span>{r.emoji}</span> {r.name}
-                <span className={`ml-auto rounded-full px-2 text-sm ${r.camp === 'lehrer' ? 'bg-chalk-red/30' : 'bg-chalk-blue/25'}`}>
+            <section key={id} className="card-chalk flex gap-3 p-3">
+              <button className="w-20 shrink-0 self-start" aria-label={`Karte ${r.name} vergrößern`} onClick={() => setZoom(id)}>
+                <img src={cardUrl(id)} alt="" className="w-full drop-shadow-md" loading="lazy" />
+              </button>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-xl leading-tight font-bold">{r.name}</h3>
+                <span
+                  className={`mt-1 inline-block rounded-full px-2 text-sm ${r.camp === 'lehrer' ? 'bg-chalk-red/30' : 'bg-chalk-blue/25'}`}
+                >
                   {CAMP_NAMES[r.camp]}
                 </span>
-              </h3>
-              <p className="mt-1 text-lg leading-snug text-chalk-dim">{r.rules}</p>
+                <p className="mt-1 text-base leading-snug text-chalk-dim">{r.rules}</p>
+              </div>
             </section>
           );
         })}
       </div>
+      <Modal open={zoom !== null} onClose={() => setZoom(null)}>
+        {zoom && (
+          <button className="w-full" onClick={() => setZoom(null)}>
+            <RoleCard role={zoom} maxDvh={75} />
+          </button>
+        )}
+      </Modal>
     </Page>
   );
 }

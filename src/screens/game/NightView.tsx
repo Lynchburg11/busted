@@ -260,7 +260,7 @@ function KlassensprecherAction({ game, onSubmit }: { game: GameState; onSubmit(d
         <span className="chalk-title text-3xl">{target.name} ist …</span>
       </div>
       <div className="w-full">
-        <RoleCard role={seen.role} camp={seen.camp} />
+        <RoleCard role={seen.role} camp={seen.camp} maxDvh={50} />
       </div>
       <div className="flex-1" />
       <button className="btn btn-primary w-full text-2xl" onClick={() => onSubmit({ targetId: target.id })}>
