@@ -6,7 +6,8 @@ export default defineConfig({
   preset: {
     ...minimal2023Preset,
     maskable: { ...minimal2023Preset.maskable, resizeOptions: { background: '#1d3328' } },
-    apple: { ...minimal2023Preset.apple, resizeOptions: { background: '#1d3328' } },
+    // iOS rundet nur die Ecken ab → Logo darf größer sein
+    apple: { ...minimal2023Preset.apple, padding: 0.12, resizeOptions: { background: '#1d3328' } },
   },
   images: ['public/icon.svg'],
 });
