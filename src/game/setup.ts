@@ -67,7 +67,7 @@ export function analyzeSetup(setup: SetupConfig, players: number): SetupAnalysis
       warnings.push('Sehr viele Lehrer für diese Spielerzahl.');
     if (setup.specials.includes('streber') && players < 7)
       warnings.push('Der Streber ist bei wenigen Spielern sehr stark für die Lehrer.');
-    if (setup.specials.includes('vertretungslehrer') && players < 6)
+    if (setup.specials.includes('verkupplerin') && players < 6)
       warnings.push('Die Gruppenarbeit kann bei wenigen Spielern das Spiel schnell beenden.');
     if (schuelerCount === 0 && players >= 6)
       warnings.push('Keine normalen Schüler – das wird chaotisch.');

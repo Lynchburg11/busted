@@ -28,13 +28,13 @@ export const NARRATION = {
     'Ding dong, große Pause. Alle legen den Kopf auf den Tisch und schließen die Augen.',
   ],
 
-  vertretungslehrer_open: [
-    'Der Vertretungslehrer öffnet die Augen. Er hat keine Ahnung vom Stoff, aber er teilt Gruppen ein. Wähle zwei Spieler für die Gruppenarbeit.',
-    'Vertretungslehrer, aufwachen! Heute steht Gruppenarbeit auf dem Plan. Tippe zwei Spieler an, die ab jetzt zusammenhängen.',
+  verkupplerin_open: [
+    'Die Verkupplerin öffnet die Augen. Amors Pfeil ist gespannt! Wähle zwei Mitschüler, die ab jetzt in einer Gruppenarbeit zusammenarbeiten.',
+    'Verkupplerin, aufwachen! Heute wird verkuppelt. Tippe zwei Mitschüler an, die ab jetzt zusammenhängen.',
   ],
-  vertretungslehrer_close: [
-    'Danke. Vertretungslehrer, tippe jetzt deine beiden Gruppenpartner sanft an die Schulter. Dann leg den Kopf wieder hin.',
-    'Gut. Vertretungslehrer, tipp die beiden Auserwählten vorsichtig an die Schulter, und dann Kopf runter.',
+  verkupplerin_close: [
+    'Danke. Verkupplerin, tippe jetzt deine beiden Gruppenpartner sanft an die Schulter. Dann leg den Kopf wieder hin.',
+    'Gut. Verkupplerin, tipp die beiden Auserwählten vorsichtig an die Schulter, und dann Kopf runter.',
   ],
   gruppenarbeit_open: [
     'Wer gerade angetippt wurde, öffnet die Augen und schaut sich an. Ihr seid jetzt eine Gruppenarbeit. Fliegt einer raus, fliegt der andere mit.',
@@ -55,11 +55,11 @@ export const NARRATION = {
   ],
   streber_close: ['Streber, Augen zu.', 'Der Streber legt den Kopf wieder hin.'],
 
-  vertrauenslehrer_open: [
-    'Der Vertrauenslehrer öffnet die Augen. Wen nimmst du heute unter deine Fittiche?',
-    'Vertrauenslehrer, aufwachen! Wähle einen Spieler, den du vor den Lehrern beschützt.',
+  vertrauensschueler_open: [
+    'Der Vertrauensschüler öffnet die Augen. Wen nimmst du heute unter deine Fittiche?',
+    'Vertrauensschüler, aufwachen! Wähle einen Spieler, den du vor den Lehrern beschützt.',
   ],
-  vertrauenslehrer_close: ['Vertrauenslehrer, Augen zu.', 'Der Vertrauenslehrer legt den Kopf wieder hin.'],
+  vertrauensschueler_close: ['Vertrauensschüler, Augen zu.', 'Der Vertrauensschüler legt den Kopf wieder hin.'],
 
   klassensprecher_open: [
     'Der Klassensprecher öffnet die Augen. Wessen Zeugnis willst du heimlich lesen?',
@@ -81,11 +81,11 @@ export const NARRATION = {
     'Lehrer, Augen zu. Die Kaffeepause ist vorbei.',
   ],
 
-  schulleiter_open: [
-    'Der Schulleiter öffnet die Augen. Schau aufs Handy: Wer wurde erwischt? Du kannst retten, jemanden auffliegen lassen oder nichts tun.',
-    'Schulleiter, aufwachen! Hier ist der Bericht aus dem Lehrerzimmer.',
+  schuelersprecher_open: [
+    'Der Schülersprecher öffnet die Augen. Schau aufs Handy: Wer wurde erwischt? Du kannst retten, jemanden auffliegen lassen oder nichts tun.',
+    'Schülersprecher, aufwachen! Hier ist der geheime Bericht aus dem Lehrerzimmer.',
   ],
-  schulleiter_close: ['Schulleiter, Augen zu.', 'Der Schulleiter verschwindet wieder in seinem Büro. Augen zu.'],
+  schuelersprecher_close: ['Schülersprecher, Augen zu.', 'Der Schülersprecher legt den Kopf wieder hin. Augen zu.'],
 
   // --- Stunde ----------------------------------------------------------------
   dayStart: [
@@ -116,10 +116,10 @@ export const NARRATION = {
   role_lehrer: ['Lehrer.'],
   role_schueler: ['Schüler.'],
   role_klassensprecher: ['Klassensprecher.'],
-  role_schulleiter: ['Schulleiter.'],
-  role_vertrauenslehrer: ['Vertrauenslehrer.'],
+  role_schuelersprecher: ['Schülersprecher.'],
+  role_vertrauensschueler: ['Vertrauensschüler.'],
   role_petze: ['Petze.'],
-  role_vertretungslehrer: ['Vertretungslehrer.'],
+  role_verkupplerin: ['Verkupplerin.'],
   role_streber: ['Streber.'],
   role_spicker: ['Spicker.'],
 

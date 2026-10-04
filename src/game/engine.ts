@@ -51,7 +51,7 @@ export function createGameWithRoles(
     phase: { type: 'reveal', index: 0 },
     night: {},
     lastProtectedId: null,
-    schulleiter: { saveUsed: false, bustUsed: false },
+    schuelersprecher: { saveUsed: false, bustUsed: false },
     pair: null,
     pairStatus: 'pending',
     streber: { modelId: null, switched: false, notified: false },
@@ -140,8 +140,8 @@ function describeElimination(s: GameState, e: Elimination): string {
   switch (e.cause) {
     case 'lehrer':
       return `${n} (${role}) wurde von den Lehrern erwischt.`;
-    case 'schulleiter':
-      return `${n} (${role}) ist beim Schulleiter aufgeflogen.`;
+    case 'schuelersprecher':
+      return `${n} (${role}) ist beim Schülersprecher aufgeflogen.`;
     case 'konferenz':
       return `${n} (${role}) wurde von der Klassenkonferenz rausgeworfen.`;
     case 'petze':
@@ -155,19 +155,19 @@ function resolveNight(s: GameState) {
   const n = s.night;
   let victim = n.lehrerTargetId ?? null;
   if (victim && n.protectedId === victim) {
-    log(s, 'pause', `Der Vertrauenslehrer hat ${nameOf(s, victim)} beschützt.`, true);
+    log(s, 'pause', `Der Vertrauensschüler hat ${nameOf(s, victim)} beschützt.`, true);
     victim = null;
   }
-  if (victim && n.save && !s.schulleiter.saveUsed) {
-    s.schulleiter.saveUsed = true;
-    log(s, 'pause', `Der Schulleiter hat ${nameOf(s, victim)} gerettet.`, true);
+  if (victim && n.save && !s.schuelersprecher.saveUsed) {
+    s.schuelersprecher.saveUsed = true;
+    log(s, 'pause', `Der Schülersprecher hat ${nameOf(s, victim)} gerettet.`, true);
     victim = null;
   }
   const requests: ElimRequest[] = [];
   if (victim) requests.push({ id: victim, cause: 'lehrer' });
-  if (n.bustId && !s.schulleiter.bustUsed) {
-    s.schulleiter.bustUsed = true;
-    requests.push({ id: n.bustId, cause: 'schulleiter' });
+  if (n.bustId && !s.schuelersprecher.bustUsed) {
+    s.schuelersprecher.bustUsed = true;
+    requests.push({ id: n.bustId, cause: 'schuelersprecher' });
   }
   s.lastProtectedId = n.protectedId ?? null;
 
@@ -187,7 +187,7 @@ function applyNightStep(s: GameState, step: NightStepId, data: NightSubmitData):
     !!id && validTargets(s, step).some((p) => p.id === id);
 
   switch (step) {
-    case 'vertretungslehrer': {
+    case 'verkupplerin': {
       if (!active) return true;
       const pair = data.pair;
       if (!pair || pair[0] === pair[1] || !valid(pair[0]) || !valid(pair[1])) return false;
@@ -209,11 +209,11 @@ function applyNightStep(s: GameState, step: NightStepId, data: NightSubmitData):
       }
       return true;
     }
-    case 'vertrauenslehrer': {
+    case 'vertrauensschueler': {
       if (!active) return true;
       if (!valid(data.targetId)) return false;
       s.night.protectedId = data.targetId;
-      log(s, 'pause', `Der Vertrauenslehrer schützt ${nameOf(s, data.targetId)}.`, true);
+      log(s, 'pause', `Der Vertrauensschüler schützt ${nameOf(s, data.targetId)}.`, true);
       return true;
     }
     case 'klassensprecher': {
@@ -231,12 +231,12 @@ function applyNightStep(s: GameState, step: NightStepId, data: NightSubmitData):
       log(s, 'pause', `Die Lehrer nehmen ${nameOf(s, data.targetId)} ins Visier.`, true);
       return true;
     }
-    case 'schulleiter': {
+    case 'schuelersprecher': {
       if (!active) return true;
       const victim = nightVictimId(s);
-      const save = !!data.save && !!victim && !s.schulleiter.saveUsed;
+      const save = !!data.save && !!victim && !s.schuelersprecher.saveUsed;
       const bustId = data.bustId ?? null;
-      if (bustId && (s.schulleiter.bustUsed || !valid(bustId))) return false;
+      if (bustId && (s.schuelersprecher.bustUsed || !valid(bustId))) return false;
       s.night.save = save;
       s.night.bustId = bustId;
       return true;
@@ -392,13 +392,13 @@ export function reduce(state: GameState, action: GameAction): GameState {
   }
 }
 
-/** Hilfsfunktion für UI & Tests: Schulleiter-Status in dieser Pause. */
-export function schulleiterOptions(s: GameState) {
+/** Hilfsfunktion für UI & Tests: Schülersprecher-Status in dieser Pause. */
+export function schuelersprecherOptions(s: GameState) {
   const victimId = nightVictimId(s);
   return {
     victimId,
-    canSave: !!victimId && !s.schulleiter.saveUsed,
-    canBust: !s.schulleiter.bustUsed,
-    self: aliveWithRole(s, 'schulleiter'),
+    canSave: !!victimId && !s.schuelersprecher.saveUsed,
+    canBust: !s.schuelersprecher.bustUsed,
+    self: aliveWithRole(s, 'schuelersprecher'),
   };
 }

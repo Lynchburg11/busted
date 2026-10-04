@@ -67,28 +67,28 @@ export const ROLES: Record<RoleId, RoleDef> = {
     weight: 7,
     suggestFrom: 4,
   },
-  schulleiter: {
-    id: 'schulleiter',
-    name: 'Schulleiter',
-    withArticle: 'der Schulleiter',
+  schuelersprecher: {
+    id: 'schuelersprecher',
+    name: 'Schülersprecher',
+    withArticle: 'der Schülersprecher',
     camp: 'schueler',
-    emoji: '🎓',
-    short: 'Kann einmal retten und einmal jemanden auffliegen lassen.',
+    emoji: '🎤',
+    short: 'Erfährt, wen die Lehrer erwischt haben. Kann einmal retten und einmal jemanden auffliegen lassen.',
     rules:
       'Du gehörst zum Schüler-Lager. In jeder Pause erfährst du, wen die Lehrer erwischt haben. Einmal im Spiel kannst du diesen Spieler retten, und einmal im Spiel kannst du einen beliebigen Spieler auffliegen lassen. Du musst nichts tun – „Nichts tun“ ist immer erlaubt.',
     multiple: false,
     weight: 4,
     suggestFrom: 7,
   },
-  vertrauenslehrer: {
-    id: 'vertrauenslehrer',
-    name: 'Vertrauenslehrer',
-    withArticle: 'der Vertrauenslehrer',
+  vertrauensschueler: {
+    id: 'vertrauensschueler',
+    name: 'Vertrauensschüler',
+    withArticle: 'der Vertrauensschüler',
     camp: 'schueler',
     emoji: '🛡️',
-    short: 'Schützt in jeder Pause einen Spieler vor den Lehrern.',
+    short: 'Schützt in jeder Pause einen Spieler vor den Lehrern, nicht zweimal denselben.',
     rules:
-      'Du gehörst zum Schüler-Lager – trotz des Namens! In jeder Pause schützt du einen Spieler (auch dich selbst) vor den Lehrern, aber nie zweimal hintereinander denselben. Gegen den Schulleiter hilft dein Schutz nicht.',
+      'Du gehörst zum Schüler-Lager. In jeder Pause schützt du einen Spieler (auch dich selbst) vor den Lehrern, aber nie zweimal hintereinander denselben. Gegen den Schülersprecher hilft dein Schutz nicht.',
     multiple: false,
     weight: 3,
     suggestFrom: 8,
@@ -106,15 +106,15 @@ export const ROLES: Record<RoleId, RoleDef> = {
     weight: 3,
     suggestFrom: 9,
   },
-  vertretungslehrer: {
-    id: 'vertretungslehrer',
-    name: 'Vertretungslehrer',
-    withArticle: 'der Vertretungslehrer',
+  verkupplerin: {
+    id: 'verkupplerin',
+    name: 'Verkupplerin (Amor)',
+    withArticle: 'die Verkupplerin',
     camp: 'schueler',
-    emoji: '📋',
-    short: 'Bildet in Pause 1 eine Gruppenarbeit aus zwei Spielern.',
+    emoji: '💘',
+    short: 'Bringt in Pause 1 zwei Mitschüler zur Gruppenarbeit zusammen.',
     rules:
-      'Du gehörst zum Schüler-Lager – trotz des Namens! In der ersten Pause bestimmst du zwei Spieler (du darfst dich selbst wählen) für die Gruppenarbeit und tippst sie an. Scheidet einer der beiden aus, scheidet der andere sofort mit aus. Gehören die beiden verschiedenen Lagern an, bilden sie ein eigenes Lager und gewinnen nur, wenn am Ende nur noch sie beide übrig sind. Sind beide raus und du bist noch dabei, bildest du in der nächsten Pause eine neue Gruppenarbeit.',
+      'Du gehörst zum Schüler-Lager. In der ersten Pause bringst du zwei Mitschüler zur Gruppenarbeit zusammen (du darfst dich selbst wählen) und tippst sie an. Scheidet einer der beiden aus, scheidet der andere sofort mit aus. Gehören die beiden verschiedenen Lagern an, bilden sie ein eigenes Lager und gewinnen nur, wenn am Ende nur noch sie beide übrig sind. Sind beide raus und du bist noch dabei, bildest du in der nächsten Pause eine neue Gruppenarbeit.',
     multiple: false,
     weight: -3,
     suggestFrom: 9,
@@ -150,10 +150,10 @@ export const ROLES: Record<RoleId, RoleDef> = {
 /** Reihenfolge der Sonderrollen im Setup und beim Vorschlag. */
 export const SPECIAL_ROLES: RoleId[] = [
   'klassensprecher',
-  'schulleiter',
-  'vertrauenslehrer',
+  'schuelersprecher',
+  'vertrauensschueler',
   'petze',
-  'vertretungslehrer',
+  'verkupplerin',
   'streber',
   'spicker',
 ];

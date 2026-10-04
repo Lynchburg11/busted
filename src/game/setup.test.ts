@@ -25,7 +25,7 @@ describe('Setup-Prüfung', () => {
   });
 
   it('meldet mehr Rollen als Spieler', () => {
-    const a = analyzeSetup({ teacherCount: 1, specials: ['klassensprecher', 'schulleiter', 'petze', 'streber'] }, 4);
+    const a = analyzeSetup({ teacherCount: 1, specials: ['klassensprecher', 'schuelersprecher', 'petze', 'streber'] }, 4);
     expect(a.errors).toContain('Mehr Rollen als Spieler. Bitte Sonderrollen abwählen.');
   });
 
@@ -33,7 +33,7 @@ describe('Setup-Prüfung', () => {
     const a = analyzeSetup({ teacherCount: 4, specials: [] }, 12);
     expect(a.warnings.some((w) => w.includes('Lehrer sind klar im Vorteil'))).toBe(true);
     const b = analyzeSetup(
-      { teacherCount: 1, specials: ['klassensprecher', 'schulleiter', 'vertrauenslehrer', 'petze'] },
+      { teacherCount: 1, specials: ['klassensprecher', 'schuelersprecher', 'vertrauensschueler', 'petze'] },
       10,
     );
     expect(b.warnings.some((w) => w.includes('Schüler sind klar im Vorteil'))).toBe(true);

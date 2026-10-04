@@ -4,16 +4,16 @@ export type RoleId =
   | 'lehrer'
   | 'schueler'
   | 'klassensprecher'
-  | 'schulleiter'
+  | 'schuelersprecher'
   | 'petze'
-  | 'vertretungslehrer'
+  | 'verkupplerin'
   | 'spicker'
-  | 'vertrauenslehrer'
+  | 'vertrauensschueler'
   | 'streber';
 
 export type Winner = 'schueler' | 'lehrer' | 'gruppenarbeit' | 'niemand';
 
-export type EliminationCause = 'lehrer' | 'schulleiter' | 'konferenz' | 'petze' | 'gruppenarbeit';
+export type EliminationCause = 'lehrer' | 'schuelersprecher' | 'konferenz' | 'petze' | 'gruppenarbeit';
 
 export type DayPart = 'pause' | 'stunde';
 
@@ -34,13 +34,13 @@ export interface Elimination {
 }
 
 export type NightStepId =
-  | 'vertretungslehrer'
+  | 'verkupplerin'
   | 'gruppenarbeit'
   | 'streber'
-  | 'vertrauenslehrer'
+  | 'vertrauensschueler'
   | 'klassensprecher'
   | 'lehrer'
-  | 'schulleiter';
+  | 'schuelersprecher';
 
 export interface NightActions {
   protectedId?: string | null;
@@ -103,7 +103,7 @@ export interface GameState {
   phase: Phase;
   night: NightActions;
   lastProtectedId: string | null;
-  schulleiter: { saveUsed: boolean; bustUsed: boolean };
+  schuelersprecher: { saveUsed: boolean; bustUsed: boolean };
   pair: { a: string; b: string; formedRound: number } | null;
   pairStatus: PairStatus;
   /** Spieler aus früheren gemischten Gruppenarbeiten – sie gewinnen nicht mit ihrem Lager. */

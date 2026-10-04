@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createGame, createGameWithRoles, reduce, schulleiterOptions } from './engine';
+import { createGame, createGameWithRoles, reduce, schuelersprecherOptions } from './engine';
 import { checkWinner, getPlayer, inspectRole, isWinner, nextVoter, validTargets } from './rules';
 import type { GameAction, GameOptions, GameState, NightStepId, NightSubmitData, RoleId } from './types';
 
@@ -70,10 +70,10 @@ describe('Rollenvergabe', () => {
 });
 
 describe('Pausenablauf', () => {
-  it('ruft in Pause 1 Vertretungslehrer und Streber auf, danach nicht mehr', () => {
+  it('ruft in Pause 1 Verkupplerin und Streber auf, danach nicht mehr', () => {
     const s = game([
       'lehrer',
-      'vertretungslehrer',
+      'verkupplerin',
       'streber',
       'klassensprecher',
       'schueler',
@@ -82,14 +82,14 @@ describe('Pausenablauf', () => {
       'schueler',
     ]);
     expect(s.phase.type === 'night' && s.phase.steps).toEqual([
-      'vertretungslehrer',
+      'verkupplerin',
       'gruppenarbeit',
       'streber',
       'klassensprecher',
       'lehrer',
     ]);
     let t = playNight(s, {
-      vertretungslehrer: { pair: ['E', 'F'] },
+      verkupplerin: { pair: ['E', 'F'] },
       streber: { modelId: 'D' },
       klassensprecher: { targetId: 'A' },
       lehrer: { targetId: 'B' },
@@ -97,9 +97,9 @@ describe('Pausenablauf', () => {
     t = continueUntil(t, 'discussion');
     t = voteOut(t, 'F'); // nimmt E mit
     t = continueUntil(t, 'night');
-    // Gruppenarbeit gebrochen: Vertretungslehrer (B) ist raus, wird aber zur Tarnung noch einmal aufgerufen
+    // Gruppenarbeit gebrochen: Verkupplerin (B) ist raus, wird aber zur Tarnung noch einmal aufgerufen
     expect(t.phase.type === 'night' && t.phase.steps).toEqual([
-      'vertretungslehrer',
+      'verkupplerin',
       'gruppenarbeit',
       'streber',
       'klassensprecher',
@@ -117,13 +117,13 @@ describe('Pausenablauf', () => {
   it('ruft bei "alle Rollen aufrufen" auch nicht vergebene Rollen auf', () => {
     const s = game(['lehrer', 'schueler', 'schueler', 'schueler'], { callAllRoles: true });
     expect(s.phase.type === 'night' && s.phase.steps).toEqual([
-      'vertretungslehrer',
+      'verkupplerin',
       'gruppenarbeit',
       'streber',
-      'vertrauenslehrer',
+      'vertrauensschueler',
       'klassensprecher',
       'lehrer',
-      'schulleiter',
+      'schuelersprecher',
     ]);
     // Schein-Aufrufe akzeptieren leere Eingaben
     const t = playNight(s, { lehrer: { targetId: 'B' } });
@@ -136,7 +136,7 @@ describe('Pausenablauf', () => {
     expect(currentStep(s)).toBe('lehrer');
     expect(act(s, { type: 'NIGHT_SUBMIT', step: 'lehrer', data: { targetId: 'B' } })).toBe(s); // Lehrer
     expect(act(s, { type: 'NIGHT_SUBMIT', step: 'lehrer', data: {} })).toBe(s);
-    expect(act(s, { type: 'NIGHT_SUBMIT', step: 'schulleiter', data: {} })).toBe(s); // falscher Schritt
+    expect(act(s, { type: 'NIGHT_SUBMIT', step: 'schuelersprecher', data: {} })).toBe(s); // falscher Schritt
   });
 
   it('erwischt das Ziel der Lehrer', () => {
@@ -146,10 +146,10 @@ describe('Pausenablauf', () => {
   });
 });
 
-describe('Vertrauenslehrer', () => {
+describe('Vertrauensschüler', () => {
   it('schützt vor den Lehrern', () => {
-    const s = playNight(game(['lehrer', 'vertrauenslehrer', 'schueler', 'schueler', 'schueler']), {
-      vertrauenslehrer: { targetId: 'C' },
+    const s = playNight(game(['lehrer', 'vertrauensschueler', 'schueler', 'schueler', 'schueler']), {
+      vertrauensschueler: { targetId: 'C' },
       lehrer: { targetId: 'C' },
     });
     expect(alive(s, 'C')).toBe(true);
@@ -157,8 +157,8 @@ describe('Vertrauenslehrer', () => {
   });
 
   it('darf nicht zweimal hintereinander denselben schützen', () => {
-    let s = playNight(game(['lehrer', 'vertrauenslehrer', 'schueler', 'schueler', 'schueler', 'schueler']), {
-      vertrauenslehrer: { targetId: 'C' },
+    let s = playNight(game(['lehrer', 'vertrauensschueler', 'schueler', 'schueler', 'schueler', 'schueler']), {
+      vertrauensschueler: { targetId: 'C' },
       lehrer: { targetId: 'D' },
     });
     s = continueUntil(s, 'discussion');
@@ -166,75 +166,75 @@ describe('Vertrauenslehrer', () => {
     s = mustAct(s, { type: 'VOTE_FINISH', counts: {} });
     s = continueUntil(s, 'night');
     expect(s.lastProtectedId).toBe('C');
-    expect(validTargets(s, 'vertrauenslehrer').map((p) => p.id)).not.toContain('C');
-    expect(act(s, { type: 'NIGHT_SUBMIT', step: 'vertrauenslehrer', data: { targetId: 'C' } })).toBe(s);
-    s = mustAct(s, { type: 'NIGHT_SUBMIT', step: 'vertrauenslehrer', data: { targetId: 'B' } });
+    expect(validTargets(s, 'vertrauensschueler').map((p) => p.id)).not.toContain('C');
+    expect(act(s, { type: 'NIGHT_SUBMIT', step: 'vertrauensschueler', data: { targetId: 'C' } })).toBe(s);
+    s = mustAct(s, { type: 'NIGHT_SUBMIT', step: 'vertrauensschueler', data: { targetId: 'B' } });
   });
 
-  it('schützt nicht vor dem Schulleiter', () => {
-    const s = playNight(game(['lehrer', 'vertrauenslehrer', 'schulleiter', 'schueler', 'schueler', 'schueler']), {
-      vertrauenslehrer: { targetId: 'D' },
+  it('schützt nicht vor dem Schülersprecher', () => {
+    const s = playNight(game(['lehrer', 'vertrauensschueler', 'schuelersprecher', 'schueler', 'schueler', 'schueler']), {
+      vertrauensschueler: { targetId: 'D' },
       lehrer: { targetId: 'E' },
-      schulleiter: { bustId: 'D' },
+      schuelersprecher: { bustId: 'D' },
     });
     expect(alive(s, 'D')).toBe(false);
     expect(alive(s, 'E')).toBe(false);
   });
 });
 
-describe('Schulleiter', () => {
-  const roles: RoleId[] = ['lehrer', 'lehrer', 'schulleiter', 'schueler', 'schueler', 'schueler', 'schueler'];
+describe('Schülersprecher', () => {
+  const roles: RoleId[] = ['lehrer', 'lehrer', 'schuelersprecher', 'schueler', 'schueler', 'schueler', 'schueler'];
 
   it('erfährt das Opfer und kann es einmal retten', () => {
     let s = game(roles);
     s = mustAct(s, { type: 'NIGHT_SUBMIT', step: 'lehrer', data: { targetId: 'D' } });
-    expect(schulleiterOptions(s)).toMatchObject({ victimId: 'D', canSave: true, canBust: true });
-    s = mustAct(s, { type: 'NIGHT_SUBMIT', step: 'schulleiter', data: { save: true } });
+    expect(schuelersprecherOptions(s)).toMatchObject({ victimId: 'D', canSave: true, canBust: true });
+    s = mustAct(s, { type: 'NIGHT_SUBMIT', step: 'schuelersprecher', data: { save: true } });
     expect(alive(s, 'D')).toBe(true);
-    expect(s.schulleiter.saveUsed).toBe(true);
+    expect(s.schuelersprecher.saveUsed).toBe(true);
 
     s = continueUntil(s, 'discussion');
     s = mustAct(s, { type: 'DISCUSSION_DONE' });
     s = mustAct(s, { type: 'VOTE_FINISH', counts: {} });
     s = continueUntil(s, 'night');
     s = mustAct(s, { type: 'NIGHT_SUBMIT', step: 'lehrer', data: { targetId: 'D' } });
-    expect(schulleiterOptions(s).canSave).toBe(false);
-    s = mustAct(s, { type: 'NIGHT_SUBMIT', step: 'schulleiter', data: { save: true } });
+    expect(schuelersprecherOptions(s).canSave).toBe(false);
+    s = mustAct(s, { type: 'NIGHT_SUBMIT', step: 'schuelersprecher', data: { save: true } });
     expect(alive(s, 'D')).toBe(false); // Rettung verbraucht
   });
 
   it('kann nichts tun', () => {
     let s = game(roles);
     s = mustAct(s, { type: 'NIGHT_SUBMIT', step: 'lehrer', data: { targetId: 'D' } });
-    s = mustAct(s, { type: 'NIGHT_SUBMIT', step: 'schulleiter', data: {} });
+    s = mustAct(s, { type: 'NIGHT_SUBMIT', step: 'schuelersprecher', data: {} });
     expect(alive(s, 'D')).toBe(false);
-    expect(s.schulleiter).toEqual({ saveUsed: false, bustUsed: false });
+    expect(s.schuelersprecher).toEqual({ saveUsed: false, bustUsed: false });
   });
 
   it('lässt nur einmal jemanden auffliegen', () => {
     let s = game(roles);
     s = mustAct(s, { type: 'NIGHT_SUBMIT', step: 'lehrer', data: { targetId: 'D' } });
-    s = mustAct(s, { type: 'NIGHT_SUBMIT', step: 'schulleiter', data: { bustId: 'A' } });
+    s = mustAct(s, { type: 'NIGHT_SUBMIT', step: 'schuelersprecher', data: { bustId: 'A' } });
     expect(alive(s, 'A')).toBe(false);
     s = continueUntil(s, 'discussion');
     s = mustAct(s, { type: 'DISCUSSION_DONE' });
     s = mustAct(s, { type: 'VOTE_FINISH', counts: {} });
     s = continueUntil(s, 'night');
     s = mustAct(s, { type: 'NIGHT_SUBMIT', step: 'lehrer', data: { targetId: 'E' } });
-    expect(act(s, { type: 'NIGHT_SUBMIT', step: 'schulleiter', data: { bustId: 'F' } })).toBe(s);
+    expect(act(s, { type: 'NIGHT_SUBMIT', step: 'schuelersprecher', data: { bustId: 'F' } })).toBe(s);
   });
 
   it('wird aufgerufen, auch wenn er schon raus ist (Schein-Aufruf)', () => {
     let s = game(roles);
     s = mustAct(s, { type: 'NIGHT_SUBMIT', step: 'lehrer', data: { targetId: 'C' } });
-    s = mustAct(s, { type: 'NIGHT_SUBMIT', step: 'schulleiter', data: {} });
+    s = mustAct(s, { type: 'NIGHT_SUBMIT', step: 'schuelersprecher', data: {} });
     s = continueUntil(s, 'discussion');
     s = mustAct(s, { type: 'DISCUSSION_DONE' });
     s = mustAct(s, { type: 'VOTE_FINISH', counts: {} });
     s = continueUntil(s, 'night');
-    expect(s.phase.type === 'night' && s.phase.steps).toContain('schulleiter');
+    expect(s.phase.type === 'night' && s.phase.steps).toContain('schuelersprecher');
     s = mustAct(s, { type: 'NIGHT_SUBMIT', step: 'lehrer', data: { targetId: 'D' } });
-    s = mustAct(s, { type: 'NIGHT_SUBMIT', step: 'schulleiter', data: { bustId: 'E' } }); // ignoriert
+    s = mustAct(s, { type: 'NIGHT_SUBMIT', step: 'schuelersprecher', data: { bustId: 'E' } }); // ignoriert
     expect(alive(s, 'E')).toBe(true);
   });
 });
@@ -285,12 +285,12 @@ describe('Petze', () => {
   });
 });
 
-describe('Vertretungslehrer & Gruppenarbeit', () => {
-  const roles: RoleId[] = ['lehrer', 'lehrer', 'vertretungslehrer', 'schueler', 'schueler', 'schueler', 'schueler', 'schueler'];
+describe('Verkupplerin & Gruppenarbeit', () => {
+  const roles: RoleId[] = ['lehrer', 'lehrer', 'verkupplerin', 'schueler', 'schueler', 'schueler', 'schueler', 'schueler'];
 
   it('Partner scheiden gemeinsam aus', () => {
     let s = game(roles);
-    s = playNight(s, { vertretungslehrer: { pair: ['D', 'E'] }, lehrer: { targetId: 'D' } });
+    s = playNight(s, { verkupplerin: { pair: ['D', 'E'] }, lehrer: { targetId: 'D' } });
     expect(alive(s, 'D')).toBe(false);
     expect(alive(s, 'E')).toBe(false);
     expect(s.phase.type === 'busted' && s.phase.eliminations.map((e) => e.cause)).toEqual(['lehrer', 'gruppenarbeit']);
@@ -298,21 +298,21 @@ describe('Vertretungslehrer & Gruppenarbeit', () => {
 
   it('bildet eine neue Gruppenarbeit, wenn beide raus sind und er noch dabei ist', () => {
     let s = game(roles);
-    s = playNight(s, { vertretungslehrer: { pair: ['D', 'E'] }, lehrer: { targetId: 'F' } });
+    s = playNight(s, { verkupplerin: { pair: ['D', 'E'] }, lehrer: { targetId: 'F' } });
     s = continueUntil(s, 'discussion');
     s = voteOut(s, 'E');
     expect(alive(s, 'D')).toBe(false);
     s = continueUntil(s, 'night');
-    expect(currentStep(s)).toBe('vertretungslehrer');
-    expect(act(s, { type: 'NIGHT_SUBMIT', step: 'vertretungslehrer', data: { pair: ['D', 'G'] } })).toBe(s);
-    s = playNight(s, { vertretungslehrer: { pair: ['C', 'G'] }, lehrer: { targetId: 'H' } });
+    expect(currentStep(s)).toBe('verkupplerin');
+    expect(act(s, { type: 'NIGHT_SUBMIT', step: 'verkupplerin', data: { pair: ['D', 'G'] } })).toBe(s);
+    s = playNight(s, { verkupplerin: { pair: ['C', 'G'] }, lehrer: { targetId: 'H' } });
     expect(s.pair).toMatchObject({ a: 'C', b: 'G', formedRound: 2 });
     expect(s.pairStatus).toBe('active');
   });
 
   it('gemischte Gruppenarbeit gewinnt, wenn nur die beiden übrig sind', () => {
-    let s = game(['lehrer', 'vertretungslehrer', 'schueler', 'schueler']);
-    s = playNight(s, { vertretungslehrer: { pair: ['A', 'C'] }, lehrer: { targetId: 'B' } });
+    let s = game(['lehrer', 'verkupplerin', 'schueler', 'schueler']);
+    s = playNight(s, { verkupplerin: { pair: ['A', 'C'] }, lehrer: { targetId: 'B' } });
     s = continueUntil(s, 'discussion');
     s = voteOut(s, 'D');
     s = mustAct(s, { type: 'CONTINUE' });
@@ -323,13 +323,13 @@ describe('Vertretungslehrer & Gruppenarbeit', () => {
   });
 
   it('Mitglieder einer früheren gemischten Gruppenarbeit gewinnen nicht mit ihrem Lager', () => {
-    let s = game(['lehrer', 'lehrer', 'vertretungslehrer', 'schueler', 'schueler', 'schueler', 'schueler']);
-    s = playNight(s, { vertretungslehrer: { pair: ['A', 'D'] }, lehrer: { targetId: 'E' } });
+    let s = game(['lehrer', 'lehrer', 'verkupplerin', 'schueler', 'schueler', 'schueler', 'schueler']);
+    s = playNight(s, { verkupplerin: { pair: ['A', 'D'] }, lehrer: { targetId: 'E' } });
     s = continueUntil(s, 'discussion');
     s = voteOut(s, 'D'); // nimmt A mit
     expect(s.formerMixedPairIds).toEqual(['A', 'D']);
     s = continueUntil(s, 'night');
-    s = playNight(s, { vertretungslehrer: { pair: ['C', 'G'] }, lehrer: { targetId: 'F' } });
+    s = playNight(s, { verkupplerin: { pair: ['C', 'G'] }, lehrer: { targetId: 'F' } });
     // lebend: B(L), C, G → weiter; C rauswählen nimmt G mit → Lehrer gewinnen
     s = continueUntil(s, 'discussion');
     s = voteOut(s, 'C');
@@ -340,8 +340,8 @@ describe('Vertretungslehrer & Gruppenarbeit', () => {
   });
 
   it('Lehrer in gemischter Gruppenarbeit zählt nicht fürs Lehrer-Lager', () => {
-    let s = game(['lehrer', 'lehrer', 'vertretungslehrer', 'schueler', 'schueler', 'schueler']);
-    s = playNight(s, { vertretungslehrer: { pair: ['A', 'D'] }, lehrer: { targetId: 'E' } });
+    let s = game(['lehrer', 'lehrer', 'verkupplerin', 'schueler', 'schueler', 'schueler']);
+    s = playNight(s, { verkupplerin: { pair: ['A', 'D'] }, lehrer: { targetId: 'E' } });
     // lebend: A(L, Paar), B(L), C, D(Paar), F  → Team-Lehrer 1 vs 4
     expect(checkWinner(s)).toBeNull();
   });

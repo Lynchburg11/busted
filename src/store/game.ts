@@ -23,7 +23,11 @@ export const useGame = create<GameStore>((setState, getState) => ({
 
   async load() {
     const [game, setup] = await Promise.all([load<GameState>(KEYS.game), load<SetupConfig>(KEYS.setup)]);
-    setState({ game: game?.version === 1 ? game : null, setup: setup ?? null, loaded: true });
+    setState({
+      game: game?.version === 1 ? migrate(game) : null,
+      setup: setup ? migrate(setup) : null,
+      loaded: true,
+    });
   },
 
   setSetup(setup) {
@@ -58,6 +62,21 @@ export const useGame = create<GameStore>((setState, getState) => ({
     remove(KEYS.game);
   },
 }));
+
+/** Alte Rollen-IDs (vor der Umbenennung) in gespeicherten Spielständen ersetzen. */
+const RENAMED: Record<string, string> = {
+  schulleiter: 'schuelersprecher',
+  vertretungslehrer: 'verkupplerin',
+  vertrauenslehrer: 'vertrauensschueler',
+};
+
+export function migrate<T>(data: T): T {
+  const json = JSON.stringify(data).replace(
+    /"(schulleiter|vertretungslehrer|vertrauenslehrer)"/g,
+    (_, id: string) => `"${RENAMED[id]}"`,
+  );
+  return JSON.parse(json) as T;
+}
 
 export function setupFor(count: number): SetupConfig {
   const stored = useGame.getState().setup;

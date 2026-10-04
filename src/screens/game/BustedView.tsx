@@ -27,7 +27,7 @@ const AFTER = {
   petze: 'afterPetze',
   konferenz: 'afterVoteOut',
   lehrer: 'afterBusted',
-  schulleiter: 'afterBusted',
+  schuelersprecher: 'afterBusted',
 } as const;
 
 /** [Name] + Textstück (+ Rollenaufdeckung) */

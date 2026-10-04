@@ -82,18 +82,18 @@ export function nightVictimId(s: GameState): string | null {
 /** Ist eine Rolle in dieser Pause tatsächlich wach (sonst nur Schein-Aufruf)? */
 export function isStepActive(s: GameState, step: NightStepId): boolean {
   switch (step) {
-    case 'vertretungslehrer':
-      return !!aliveWithRole(s, 'vertretungslehrer');
+    case 'verkupplerin':
+      return !!aliveWithRole(s, 'verkupplerin');
     case 'gruppenarbeit':
       return !!s.pair && s.pairStatus === 'active' && s.pair.formedRound === s.round;
     case 'streber':
       return !!aliveWithRole(s, 'streber');
-    case 'vertrauenslehrer':
-      return !!aliveWithRole(s, 'vertrauenslehrer');
+    case 'vertrauensschueler':
+      return !!aliveWithRole(s, 'vertrauensschueler');
     case 'klassensprecher':
       return !!aliveWithRole(s, 'klassensprecher');
-    case 'schulleiter':
-      return !!aliveWithRole(s, 'schulleiter');
+    case 'schuelersprecher':
+      return !!aliveWithRole(s, 'schuelersprecher');
     case 'lehrer':
       return aliveTeachers(s).length > 0;
   }
@@ -103,13 +103,13 @@ export function isStepActive(s: GameState, step: NightStepId): boolean {
 export function validTargets(s: GameState, step: NightStepId): GamePlayer[] {
   const alive = alivePlayers(s);
   switch (step) {
-    case 'vertretungslehrer':
+    case 'verkupplerin':
       return alive;
     case 'streber': {
       const self = aliveWithRole(s, 'streber');
       return alive.filter((p) => p.id !== self?.id);
     }
-    case 'vertrauenslehrer':
+    case 'vertrauensschueler':
       return alive.filter((p) => p.id !== s.lastProtectedId);
     case 'klassensprecher': {
       const self = aliveWithRole(s, 'klassensprecher');
@@ -117,8 +117,8 @@ export function validTargets(s: GameState, step: NightStepId): GamePlayer[] {
     }
     case 'lehrer':
       return alive.filter((p) => !isTeacher(s, p));
-    case 'schulleiter': {
-      const self = aliveWithRole(s, 'schulleiter');
+    case 'schuelersprecher': {
+      const self = aliveWithRole(s, 'schuelersprecher');
       return alive.filter((p) => p.id !== self?.id);
     }
     case 'gruppenarbeit':
@@ -130,12 +130,12 @@ export function buildNightSteps(s: GameState): NightStepId[] {
   const inPlay = (r: RoleId) => s.options.callAllRoles || s.deck.includes(r);
   const steps: NightStepId[] = [];
   const pairDue = s.pairStatus === 'pending' || s.pairStatus === 'broken';
-  if (pairDue && inPlay('vertretungslehrer')) steps.push('vertretungslehrer', 'gruppenarbeit');
+  if (pairDue && inPlay('verkupplerin')) steps.push('verkupplerin', 'gruppenarbeit');
   if (inPlay('streber')) steps.push('streber');
-  if (inPlay('vertrauenslehrer')) steps.push('vertrauenslehrer');
+  if (inPlay('vertrauensschueler')) steps.push('vertrauensschueler');
   if (inPlay('klassensprecher')) steps.push('klassensprecher');
   steps.push('lehrer');
-  if (inPlay('schulleiter')) steps.push('schulleiter');
+  if (inPlay('schuelersprecher')) steps.push('schuelersprecher');
   return steps;
 }
 

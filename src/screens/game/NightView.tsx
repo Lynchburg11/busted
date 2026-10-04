@@ -4,7 +4,7 @@ import { sfx } from '../../audio/sfx';
 import { Avatar } from '../../components/Avatar';
 import { PlayerGrid } from '../../components/PlayerGrid';
 import { CAMP_NAMES, ROLES } from '../../config/roles';
-import { schulleiterOptions } from '../../game/engine';
+import { schuelersprecherOptions } from '../../game/engine';
 import { alivePlayers, getPlayer, inspectRole, isStepActive, validTargets } from '../../game/rules';
 import type { GamePlayer, GameState, NightStepId, NightSubmitData } from '../../game/types';
 import { randomBetween, useScript } from '../../lib/script';
@@ -23,22 +23,22 @@ export function NightView({ game }: { game: GameState }) {
 
 function openLines(game: GameState, step: NightStepId): Line[] {
   switch (step) {
-    case 'vertretungslehrer':
-      return [line('vertretungslehrer_open')];
+    case 'verkupplerin':
+      return [line('verkupplerin_open')];
     case 'gruppenarbeit':
       return [line('gruppenarbeit_open')];
     case 'streber':
       return [line(game.round === 1 ? 'streber_open_first' : 'streber_open')];
-    case 'vertrauenslehrer':
-      return [line('vertrauenslehrer_open')];
+    case 'vertrauensschueler':
+      return [line('vertrauensschueler_open')];
     case 'klassensprecher':
       return [line('klassensprecher_open')];
     case 'lehrer': {
       const spicker = game.options.callAllRoles || game.deck.includes('spicker');
       return spicker ? [line('lehrer_open'), line('spicker_hint')] : [line('lehrer_open')];
     }
-    case 'schulleiter':
-      return [line('schulleiter_open')];
+    case 'schuelersprecher':
+      return [line('schuelersprecher_open')];
   }
 }
 
@@ -90,17 +90,17 @@ function NightStep({ game, step, first }: { game: GameState; step: NightStepId; 
 
   const submit = (data: NightSubmitData) => setSubmitted(data);
   switch (step) {
-    case 'vertretungslehrer':
-      return <VertretungslehrerAction game={game} onSubmit={submit} />;
+    case 'verkupplerin':
+      return <VerkupplerinAction game={game} onSubmit={submit} />;
     case 'streber':
       return <StreberAction game={game} onSubmit={submit} />;
-    case 'vertrauenslehrer':
+    case 'vertrauensschueler':
       return (
         <PickOne
           game={game}
           step={step}
-          emoji={ROLES.vertrauenslehrer.emoji}
-          title="Vertrauenslehrer"
+          emoji={ROLES.vertrauensschueler.emoji}
+          title="Vertrauensschüler"
           text="Wen beschützt du in dieser Pause?"
           disabledLabel="zuletzt geschützt"
           confirmLabel="Beschützen"
@@ -121,8 +121,8 @@ function NightStep({ game, step, first }: { game: GameState; step: NightStepId; 
           onConfirm={(targetId) => submit({ targetId })}
         />
       );
-    case 'schulleiter':
-      return <SchulleiterAction game={game} onSubmit={submit} />;
+    case 'schuelersprecher':
+      return <SchuelersprecherAction game={game} onSubmit={submit} />;
     default:
       return <NeutralScreen />;
   }
@@ -176,13 +176,13 @@ function PickOne(props: {
   );
 }
 
-function VertretungslehrerAction({ game, onSubmit }: { game: GameState; onSubmit(d: NightSubmitData): void }) {
+function VerkupplerinAction({ game, onSubmit }: { game: GameState; onSubmit(d: NightSubmitData): void }) {
   const [sel, setSel] = useState<string[]>([]);
   const toggle = (id: string) =>
     setSel((s) => (s.includes(id) ? s.filter((x) => x !== id) : s.length < 2 ? [...s, id] : [s[1], id]));
   return (
     <div className="fade-in flex flex-1 flex-col">
-      <StepHeader emoji={ROLES.vertretungslehrer.emoji} title="Gruppenarbeit">
+      <StepHeader emoji={ROLES.verkupplerin.emoji} title="Gruppenarbeit">
         Wähle zwei Spieler (du darfst dich selbst wählen).
       </StepHeader>
       <PlayerGrid players={alivePlayers(game)} selected={sel} onSelect={toggle} />
@@ -270,15 +270,15 @@ function KlassensprecherAction({ game, onSubmit }: { game: GameState; onSubmit(d
   );
 }
 
-function SchulleiterAction({ game, onSubmit }: { game: GameState; onSubmit(d: NightSubmitData): void }) {
-  const { victimId, canSave, canBust } = schulleiterOptions(game);
+function SchuelersprecherAction({ game, onSubmit }: { game: GameState; onSubmit(d: NightSubmitData): void }) {
+  const { victimId, canSave, canBust } = schuelersprecherOptions(game);
   const victim = getPlayer(game, victimId);
   const [save, setSave] = useState(false);
   const [bustMode, setBustMode] = useState(false);
   const [bustId, setBustId] = useState<string | null>(null);
 
   if (bustMode) {
-    const { all, disabled } = gridFor(game, 'schulleiter');
+    const { all, disabled } = gridFor(game, 'schuelersprecher');
     return (
       <div className="fade-in flex flex-1 flex-col">
         <StepHeader emoji="⚡" title="Auffliegen lassen">
@@ -311,7 +311,7 @@ function SchulleiterAction({ game, onSubmit }: { game: GameState; onSubmit(d: Ni
   const bustTarget = getPlayer(game, bustId);
   return (
     <div className="fade-in flex flex-1 flex-col gap-4">
-      <StepHeader emoji={ROLES.schulleiter.emoji} title="Schulleiter" />
+      <StepHeader emoji={ROLES.schuelersprecher.emoji} title="Schülersprecher" />
       <div className="card-chalk flex flex-col items-center gap-2 p-4 text-center">
         {victim ? (
           <>
